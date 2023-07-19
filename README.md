@@ -1,6 +1,6 @@
 # u-blox-capture
 
-Tools to capture RTK GPS output using u-blox C099-F9P application board.
+Fork of SpectacularAI's repository. Added functionalities enable the scripts to output more information about the state of the GNSS tracking (eg. info related to RTK).
 
 ## Building
 
