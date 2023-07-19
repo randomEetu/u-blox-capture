@@ -109,6 +109,7 @@ def buildMeasurement(group, useHighPrecision=True, itow=None):
         }
         measurement["groundSpeed"] = pvt["gSpeed"] * MM_TO_METERS
         measurement["speedAccuracy"] = pvt["sAcc"] * MM_TO_METERS
+        measurement["fixStatus"] = pvt["flags"]
     return measurement
 
 

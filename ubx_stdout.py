@@ -16,12 +16,15 @@ parser.add_argument("device", help="Serial device")
 parser.add_argument("-b", help="Baudrate", type=int, default=460800)
 parser.add_argument("-v", help="Verbose, prints errors", action="store_true")
 parser.add_argument("--json", help="Output in JSON format", action="store_true")
+parser.add_argument("--fixStatus", help="Includes the RTK solution's state", action="store_true")
 parser.add_argument("--incomplete", help="Allow printing incomplete solutions", action="store_true")
 
-
+carrSolnDict = {0: "None", 1: "Float", 2: "Fix"} # carrSoln is defined as 0=None, 1=Float, 2=Fix
+						 # http://docs.ros.org/en/noetic/api/ublox_msgs/html/msg/NavPVT.html
 def outputSolution(solution, asJson = False):
     measurement = buildMeasurement(solution)
     if not measurement: return
+    fixStatus = carrSolnDict[measurement["fixStatus"]["carrSoln"]] # We are only interested in the 'carrSoln'
     outputStr = ""
     if asJson:
         outputStr = json.dumps({
@@ -29,9 +32,10 @@ def outputSolution(solution, asJson = False):
             "longitude": measurement["lon"],
             "altitude": measurement["altitude"],
             "monotonicTime":  measurement["time"],
-            "accuracy": measurement["altitude"],
-            "verticalAccuracy": measurement["verticalAccuracy"]
-        })
+            "accuracy": measurement["accuracy"],
+            "verticalAccuracy": measurement["verticalAccuracy"]})
+        if args.fixStatus: outputStr = outputStr[:-1]; outputStr += ', "fixSolution": "%s"}' % (fixStatus) # append fixStatus to str 'outputStr' by removing the '}' from the tail before appending.
+
     else:
         arr = [
             # measurement["time"],
@@ -39,8 +43,9 @@ def outputSolution(solution, asJson = False):
             measurement["lon"],
             measurement["altitude"],
             measurement["verticalAccuracy"],
-            measurement["accuracy"],
-        ]
+            measurement["accuracy"],]
+        if args.fixStatus: arr.append(fixStatus)
+
         outputStr = ' '.join(str(val) for val in arr)
     print(outputStr)
     sys.stdout.flush()
